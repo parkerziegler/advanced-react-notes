@@ -134,3 +134,120 @@ A way to get around this is by namespacing the `props` passed by your HOC. For e
 which you can then document as being reserved by your HOC. */
 return <Component {...props} toggle={...toggleContext}>;
 ```
+
+## Improve Debuggability of Higher Order Components
+You can use the `displayName` prop to alter the display name of your component in React DevTools. For example:
+
+> App.displayName = "MyApp"; // this will render <MyApp> in DevTools
+
+However, moments do arise where using HOCs results in `Unknown` component names in your app, especially if the HOC wraps a stateless functional component created with an arrow function.
+
+```javascript
+/* this will show up as <Unknown> in the component tree because its name
+cannot be inferred from the anonymous arrow function. */
+const MyToggle = withToggle(
+    ({ toggle: { on, toggle }}) => (
+        <button onClick={toggle}>
+            {on ? 'on' : 'off'}
+        </button>
+    )
+);
+```
+
+To fix this, it's best to specify your component separately from the instance where it gets wrapped by the HOC.
+
+```javascript
+// component can infer MyToggle as the component name
+const MyToggle = ({ toggle: { on, toggle }}) => (
+        <button onClick={toggle}>
+            {on ? 'on' : 'off'}
+        </button>
+    );
+
+const MyToggleWrapper = withToggle(MyToggle);
+
+// MyToggle will now show up in the component tree
+```
+
+You can also make the `displayName` if your HOC explicit, i.e.:
+
+> Wrapper.displayName = `withToggle(${Component.displayName || Component.name})`
+
+## Handle `ref` props with Higher Order Components
+Be mindful that stateless functional components **cannot be given `ref`s**. This can be difficult when working with HOCS. React **does not** forward `ref`s to components wrapped by HOCs. A way to get around this is by using a secondary `prop` that holds the originally passed `ref` – something like `innerRef`. By passing this along, we obtain a `ref` for our wrapped component, which we can use to call methods, update `state`, etc.
+
+```javascript
+function withToggle(Component) {
+
+    // pass a prop called innerRef, along with other props
+    function Wrapper({ innerRef, ...props }, context) {
+        const toggleContext = context['TOGGLE_CONTEXT'];
+
+        // use innerRef to grab the instance of Component
+        return <Component ref={innerRef} {...props} {...toggleContext}>;
+    }
+
+    ToggleOn.contextTypes = {
+        [TOGGLE_CONTEXT]: PropTypes.object.isRequired
+    }
+
+    return Wrapper;
+}
+
+// jsx for our wrapped component
+<MyToggleWrapper
+    innerRef={myToggle => this.myToggle = myToggle}
+/>
+```
+
+## Improve Unit Testability of Higher Order Components
+Other developers using your HOC may want to gain access to the component they are wrapping without needing to `export` that component from the module where it's defined. We can make this easy by specifying the component passed to the HOC as a separate property on the HOC. For example:
+
+```javascript
+function withToggle(Component) {
+
+    function Wrapper({ innerRef, ...props }, context) {
+        const toggleContext = context['TOGGLE_CONTEXT'];
+
+        return <Component ref={innerRef} {...props} {...toggleContext}>;
+    }
+
+    ToggleOn.contextTypes = {
+        [TOGGLE_CONTEXT]: PropTypes.object.isRequired
+    }
+
+    // here we assign Component to the WrappedComponent property on Wrapper
+    Wrapper.WrappedComponent = Component;
+    return Wrapper;
+}
+
+// test the rendering of the wrapped component
+ReactDOM.render(
+    <Wrapper.WrappedComponent />,
+    document.getElementById("#wrapperDiv")
+);
+```
+
+## Handle Static Properties Properly with Higher Order Components
+Remember that when defining `static` properties on a component wrapped by an HOC, those properties **are not directly accessible from the wrapped component instance**. However, we would like `static` properties to persist through the process of HOC wrapping. In essence, we want to make the use of our HOC as "inobservable as possible." To do this, we want to hoist all `static` properties that are not React specific (i.e. `displayName`) so they apply to our HOC. We can use the [`hoist-non-react-statics`](https://github.com/mridgway/hoist-non-react-statics) library to do this. For example:
+
+```javascript
+function withToggle(Component) {
+
+    function Wrapper({ innerRef, ...props }, context) {
+        const toggleContext = context['TOGGLE_CONTEXT'];
+
+        return <Component ref={innerRef} {...props} {...toggleContext}>;
+    }
+
+    ToggleOn.contextTypes = {
+        [TOGGLE_CONTEXT]: PropTypes.object.isRequired
+    }
+
+    Wrapper.WrappedComponent = Component;
+
+    /* here we will hoist all non-React static properties of
+    Wrapper and Component. */
+    return hoistNonReactStatics(Wrapper, Component);
+}
+```
