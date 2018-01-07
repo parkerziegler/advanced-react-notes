@@ -251,3 +251,98 @@ function withToggle(Component) {
     return hoistNonReactStatics(Wrapper, Component);
 }
 ```
+
+## Use Render Props with React
+The concept of render props in React involves passing the contents of our `render` method as a `prop` to our child components. For example:
+
+```javascript
+/* our function for rendering a Switch component. we'll use this function
+in our App component, which will pass it as a prop to <Toggle />. */
+function renderSwitch({ on, toggle }) {
+
+    return <Switch on={on} onClick={toggle}>;
+}
+
+/* Toggle just calls this.props.renderSwitch to render the Switch,
+passing along state and static properties as args */
+class Toggle extends React.Component {
+
+    render() {
+        return this.props.renderSwitch({
+            on: this.state.on,
+            toggle: this.toggle
+        });
+    }
+}
+
+// pass renderSwitch to App here
+class App extends React.Component {
+
+    render() {
+
+        return <Toggle renderSwitch={renderSwitch}>
+    }
+}
+```
+
+You could pass any function that returns valid JSX in the `renderSwitch` prop, even an arrow function. For example:
+
+```javascript
+class App extends React.Component {
+
+    render() {
+
+        return <Toggle renderSwitch={({ on, toggle }) => (
+            <div>
+                <Switch on={on} toggle={toggle}>
+                {on ? 'on' : 'off}
+            </div>
+        )}>
+    }
+}
+```
+
+This pattern is called **render props** and presents several advantages over Higher Order Components. With HOCs, all child components have to be wrapped by the HOC resulting in new wrapped components. This leads to problems with things like `displayName`, nesting components while using `this.props.children`, passing of `context`, and hoisting of non-React `static` properties. It also introduces an increased chance of `prop` namespace clashes (see above), where `props` namespaced by the HOC can overwrite, or be overwritten, by `props` passed to the child. It gets even more complicated when passing `props` to an HOC that applies `props` to its children. The children give no indication if the `prop` is being passed through or being added by the HOC wrapper. This forces us to look at the implementation of the HOC to determine how and where `props` are passed.
+
+Composition also varies between these two approaches. HOC composition occurs statically before `render` is called – we wrap our child components in HOCs, and then we can render them. With **render props**, the composition happens dynamically in the `render` method, meaning it responds elegantly and simply to changes in `props` and `state`.
+
+## Use Prop Collections with Render Props
+When using `props` that may be common to several components or HTML elements in the `render` method of your component, it can make sense to group these into **prop collections**. For example:
+
+```javascript
+class Toggle extends React.Component {
+  
+  // pass common props used by <Switch> and <button> as togglerProps colelction
+  render() {
+    return this.props.render({
+      on: this.state.on,
+      toggle: this.toggle,
+      // here's our collection of props
+      togglerProps: {
+        'aria-expanded': this.state.on,
+        onClick: this.toggle,
+      },
+    })
+  }
+}
+
+function App() {
+  return (
+    <Toggle
+      onToggle={on => console.log('toggle', on)}
+      render={({on, toggle, togglerProps}) => (
+        <div>
+        {/* spread the togglerProps for the elements / components that use it */}
+          <Switch on={on} {...togglerProps} />
+          <hr />
+          <button {...togglerProps}>
+            {on ? 'on' : 'off'}
+          </button>
+        </div>
+      )}
+    />
+  )
+}
+```
+
+This pattern is particularly useful for grouping collections of `props` that you may want to apply broadly across types of elements, like `aria` attributes for `button`s, `input`s, etc.
