@@ -1,0 +1,21 @@
+{
+  "name": "advanced-react-notes",
+  "version": "0.0.1",
+  "description":
+    "Markdown notes for Kent C. Dodds' Advanced React Component Patterns course.",
+  "main": "README.md",
+  "repository": "https://github.com/parkerziegler/advanced-react-notes.git",
+  "author": "parkerziegler <parkerellisziegler@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "lint-staged": "^6.0.0",
+    "prettier": "1.9.2"
+  },
+  "scripts": {
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,json,css,md}": ["prettier --write", "git add"]
+  }
+}
