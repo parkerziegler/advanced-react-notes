@@ -16,6 +16,10 @@ Separate lessons are broken down into separate Markdown files.
 * [Handle static properties properly with Higher Order Components](HandleStaticPropertiesHOCs.md)
 * [Use Render Props with React](RenderProps.md)
 * [Use Prop Collections with Render Props](PropCollections.md)
+* [Use Prop Getters with Render Props](PropGetters.md)
+* [Use Component State Initializers](ComponentStateInitializers.md)
+* [Make Controlled React Components with Control Props](ControlledComponentsWithControlProps.md)
+* [Implement a React Context Provider](ReactContextProvider.md)
 
 While these notes may help you in your learning, there is no substitute for watching and interacting with the actual course. It's also important to support folks like Kent who take the time to make these amazing resources.
 
