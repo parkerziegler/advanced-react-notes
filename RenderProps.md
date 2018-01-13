@@ -56,7 +56,7 @@ class App extends React.Component {
         return <Toggle renderSwitch={({ on, toggle }) => (
             <div>
                 <Switch on={on} toggle={toggle}>
-                {on ? 'on' : 'off}
+                {on ? 'on' : 'off'}
             </div>
         )}>
     }

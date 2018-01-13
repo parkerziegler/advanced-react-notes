@@ -89,7 +89,7 @@ class App extends React.Component {
             />
             {timesClicked > 4 ? (
               <div>
-                Whoa, you've clicked too much!
+                Whoa, you have clicked too much!
                 <br />
                 <button onClick={toggle.reset}>reset</button>
               </div>
