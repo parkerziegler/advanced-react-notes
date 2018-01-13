@@ -42,7 +42,7 @@ const ToggleOn = ({ on, toggle }) => (
     on ? <div onClick={toggle}>On</div> : null;
 );
 
-const ToggleOn = ({ on, toggle }) => (
+const ToggleOff = ({ on, toggle }) => (
     on ? null : <div onClick={toggle}>Off</div>;
 );
 
