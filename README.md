@@ -21,8 +21,10 @@ Separate lessons are broken down into separate Markdown files.
 * [Make Controlled React Components with Control Props](ControlledComponentsWithControlProps.md)
 * [Implement a React Context Provider](ReactContextProvider.md)
 * [Implement a Higher Order Component with Render Props](HOCWithRenderProps.md)
+* [Rerender Descendants Through shouldComponentUpdate](RerenderDescendantsSCU.md)
+* [Use Redux with Render Props](UseReduxWithRenderProps.md)
 
-While these notes may help you in your learning, there is no substitute for watching and interacting with the actual course. It's also important to support folks like Kent who take the time to make these amazing resources.
+While these notes may help you in your learning, there is no substitute for watching and interacting with the actual course. It's also important to support folks like Kent who take the time to make these amazing resources. Seriously, get an Egghead subscription, watch the videos, vote with your dollars folks!
 
 ## Contributing
 
